@@ -130,6 +130,16 @@ if $interactive
   $stderr.puts "VMRC is not installed. You will be unable to view virtual machine consoles. Use the vmrc.install command to install it." unless CMD.vmrc.find_vmrc 
   $stderr.puts "Use the 'connect' command to connect to an ESX or VC server." if $shell.connections.empty?
   CMD.basic.ls RVC::Util.lookup_single('.')
+
+  # Check whether we have a $HOME/.rvc-marks defined too. Load saved marks from
+  # there. Rather crude and only accepts a single path per mark.
+  marks_fn = "#{ENV['HOME']}/.rvc-marks"
+  if File.exists?( marks_fn )
+    IO.foreach(marks_fn) do |l|
+      next unless l =~ /mark\s+([a-z]+)\s(.*)$/
+      $shell.session.set_mark $1, [ RVC::Util.lookup_single( $2 ) ]
+    end
+  end
 end
 
 if $opts[:script]
